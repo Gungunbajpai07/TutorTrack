@@ -1,4 +1,4 @@
-require('dotenv').config({ path: __dirname + '/.env' });
+
 
 console.log("THIS IS NEW VERSION");
 const express = require("express");
