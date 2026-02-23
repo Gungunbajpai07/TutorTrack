@@ -1,21 +1,26 @@
 const Student = require("../models/Student");
 
-// Get all students
+// Get all students for logged-in tutor
 exports.getAllStudents = async (req, res) => {
   try {
-    const students = await Student.find().sort({ createdAt: -1 });
+    const students = await Student.find({ tutor: req.user._id }).sort({
+      createdAt: -1,
+    });
     console.log("COLLECTION NAME:", Student.collection.name);
-    console.log("TOTAL STUDENTS:", students.length);
+    console.log("TOTAL STUDENTS (for tutor):", students.length);
     res.json(students);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// Get single student by ID
+// Get single student by ID (for logged-in tutor)
 exports.getStudentById = async (req, res) => {
   try {
-    const student = await Student.findById(req.params.id);
+    const student = await Student.findOne({
+      _id: req.params.id,
+      tutor: req.user._id,
+    });
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
@@ -25,10 +30,14 @@ exports.getStudentById = async (req, res) => {
   }
 };
 
-// Create new student
+// Create new student for logged-in tutor
 exports.createStudent = async (req, res) => {
   try {
-    const student = new Student(req.body);
+    const payload = {
+      ...req.body,
+      tutor: req.user._id,
+    };
+    const student = new Student(payload);
     await student.save();
     res.status(201).json(student);
   } catch (error) {
@@ -36,11 +45,11 @@ exports.createStudent = async (req, res) => {
   }
 };
 
-// Update student
+// Update student (only if owned by tutor)
 exports.updateStudent = async (req, res) => {
   try {
-    const updated = await Student.findByIdAndUpdate(
-      req.params.id,
+    const updated = await Student.findOneAndUpdate(
+      { _id: req.params.id, tutor: req.user._id },
       req.body,
       { new: true, runValidators: true }
     );
@@ -55,10 +64,13 @@ exports.updateStudent = async (req, res) => {
   }
 };
 
-// Delete student
+// Delete student (only if owned by tutor)
 exports.deleteStudent = async (req, res) => {
   try {
-    const deleted = await Student.findByIdAndDelete(req.params.id);
+    const deleted = await Student.findOneAndDelete({
+      _id: req.params.id,
+      tutor: req.user._id,
+    });
 
     if (!deleted) {
       return res.status(404).json({ message: "Student not found" });
@@ -70,11 +82,14 @@ exports.deleteStudent = async (req, res) => {
   }
 };
 
-// Update attendance (increment by 1)
+// Update attendance (increment by 1, only if owned by tutor)
 exports.updateAttendance = async (req, res) => {
   try {
-    const student = await Student.findById(req.params.id);
-    
+    const student = await Student.findOne({
+      _id: req.params.id,
+      tutor: req.user._id,
+    });
+
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }

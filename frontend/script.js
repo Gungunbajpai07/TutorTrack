@@ -1,36 +1,125 @@
 // API Configuration - Auto-detect based on current location
 const API_BASE_URL = window.location.origin;
+const TOKEN_KEY = "tt_auth_token";
+const USER_KEY = "tt_current_user";
 
-//LOGIN
-function login() {
-    let user = username.value;
-    let pass = password.value;
+function getAuthHeaders(extra = {}) {
+    const token = localStorage.getItem(TOKEN_KEY);
+    return token
+        ? { ...extra, Authorization: `Bearer ${token}` }
+        : { ...extra };
+}
 
-    if (user && pass) {
-        localStorage.setItem("loggedIn", "true");
-        localStorage.setItem("currentUser", user);
+// AUTH
+async function login() {
+    const user = document.getElementById("username")?.value.trim();
+    const pass = document.getElementById("password")?.value;
+
+    if (!user || !pass) {
+        return alert("Please enter username and password");
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ username: user, password: pass })
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            const message = err.error || "Login failed. Check your credentials.";
+            return alert(message);
+        }
+
+        const data = await response.json();
+        localStorage.setItem(TOKEN_KEY, data.token);
+        localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+
         window.location.href = "index.html";
+    } catch (error) {
+        console.error("Login error:", error);
+        alert("Unable to login. Please try again.");
     }
 }
 
-function checkLogin() {
-    if (localStorage.getItem("loggedIn") !== "true") {
+async function register() {
+    const name = document.getElementById("name")?.value.trim();
+    const user = document.getElementById("username")?.value.trim();
+    const pass = document.getElementById("password")?.value;
+
+    if (!user || !pass) {
+        return alert("Please enter username and password");
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/register`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ username: user, password: pass, name })
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            const message = err.error || "Registration failed.";
+            return alert(message);
+        }
+
+        const data = await response.json();
+        localStorage.setItem(TOKEN_KEY, data.token);
+        localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+
+        window.location.href = "index.html";
+    } catch (error) {
+        console.error("Register error:", error);
+        alert("Unable to register. Please try again.");
+    }
+}
+
+async function checkLogin() {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/me`, {
+            headers: getAuthHeaders()
+        });
+
+        if (!response.ok) {
+            throw new Error("Not authenticated");
+        }
+
+        const user = await response.json();
+        localStorage.setItem(USER_KEY, JSON.stringify(user));
+    } catch (error) {
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(USER_KEY);
         window.location.href = "login.html";
     }
 }
 
 function logout() {
-    localStorage.clear();
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
     window.location.href = "login.html";
 }
 
-// DATA - Now using MongoDB via API
+// DATA - Now using MongoDB via API (per authenticated tutor)
 let students = [];
 
 // Load students from API
 async function loadStudentsFromAPI() {
     try {
-        const response = await fetch(`${API_BASE_URL}/students`);
+        const response = await fetch(`${API_BASE_URL}/students`, {
+            headers: getAuthHeaders()
+        });
         if (!response.ok) throw new Error("Failed to fetch students");
         students = await response.json();
         loadStudents();
@@ -51,9 +140,9 @@ async function addStudent() {
     try {
         const response = await fetch(`${API_BASE_URL}/students`, {
             method: "POST",
-            headers: {
+            headers: getAuthHeaders({
                 "Content-Type": "application/json"
-            },
+            }),
             body: JSON.stringify({
                 name,
                 fees,
@@ -127,7 +216,8 @@ async function deleteStudent(id) {
 
     try {
         const response = await fetch(`${API_BASE_URL}/students/${id}`, {
-            method: "DELETE"
+            method: "DELETE",
+            headers: getAuthHeaders()
         });
 
         if (!response.ok) throw new Error("Failed to delete student");
@@ -148,9 +238,9 @@ async function editStudent(id) {
         try {
             const response = await fetch(`${API_BASE_URL}/students/${id}`, {
                 method: "PUT",
-                headers: {
+                headers: getAuthHeaders({
                     "Content-Type": "application/json"
-                },
+                }),
                 body: JSON.stringify({
                     ...s,
                     paid: parseInt(newPaid)
@@ -170,7 +260,8 @@ async function editStudent(id) {
 async function markAttendance(id) {
     try {
         const response = await fetch(`${API_BASE_URL}/students/${id}/attendance`, {
-            method: "PUT"
+            method: "PUT",
+            headers: getAuthHeaders()
         });
 
         if (!response.ok) throw new Error("Failed to update attendance");

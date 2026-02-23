@@ -1,4 +1,4 @@
-
+require('dotenv').config(); // ALWAYS at the top
 
 console.log("THIS IS NEW VERSION");
 const express = require("express");
@@ -6,6 +6,8 @@ const cors = require("cors");
 const path = require("path");
 const connectDB = require("./config/database");
 const studentRoutes = require("./routes/studentRoutes");
+const authRoutes = require("./routes/authRoutes");
+const authMiddleware = require("./middleware/authMiddleware");
 
 // Initialize Express app
 const app = express();
@@ -20,8 +22,11 @@ app.use(express.static(path.join(__dirname, "../frontend")));
 // Connect to MongoDB
 connectDB();
 
-// API Routes
-app.use("/students", studentRoutes);
+// Auth routes (public)
+app.use("/auth", authRoutes);
+
+// API Routes (protected)
+app.use("/students", authMiddleware, studentRoutes);
 
 // Frontend Routes
 app.get("/login.html", (req, res) => {

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login - TutorTrack</title>
+    <title>Register - TutorTrack</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -10,16 +10,17 @@
 <div class="login-box glass">
     <div class="login-logo-container">
         <img src="logo.png" alt="TutorTrack Logo" class="login-logo">
-        <h2>TutorTrack</h2>
-        <p class="login-subtitle">Sign in to your tutor dashboard</p>
+        <h2>Create Tutor Account</h2>
+        <p class="login-subtitle">Each tutor gets their own data</p>
     </div>
     <div class="login-form">
+        <input type="text" id="name" placeholder="Full name (optional)">
         <input type="text" id="username" placeholder="Username">
         <input type="password" id="password" placeholder="Password">
-        <button class="primary-btn" onclick="login()">Login</button>
+        <button class="primary-btn" onclick="register()">Sign up</button>
         <p class="login-footer">
-            New tutor?
-            <a href="register.html">Create an account</a>
+            Already have an account?
+            <a href="login.html">Back to login</a>
         </p>
     </div>
 </div>
@@ -27,3 +28,4 @@
 <script src="script.js"></script>
 </body>
 </html>
+
