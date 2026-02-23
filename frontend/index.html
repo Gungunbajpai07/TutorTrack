@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TutorTrack Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body onload="checkLogin(); loadStudentsFromAPI();">
+
+<div class="sidebar">
+    <div class="logo-container">
+        <img src="logo.png" alt="TutorTrack Logo" class="logo">
+        <h2>TutorTrack</h2>
+    </div>
+    <button onclick="showAll()">All Students</button>
+    <button onclick="filterMonth()">This Month</button>
+    <button onclick="exportCSV()">Export CSV</button>
+    <button onclick="toggleMode()">Dark / Light</button>
+    <button onclick="logout()">Logout</button>
+</div>
+
+<div class="main">
+
+    <div class="top-cards">
+        <div class="glass stat">
+            <h3>Total Students</h3>
+            <p id="totalStudents">0</p>
+        </div>
+        <div class="glass stat">
+            <h3>Total Income</h3>
+            <p>₹ <span id="totalIncome">0</span></p>
+        </div>
+        <div class="glass stat">
+            <h3>Pending</h3>
+            <p>₹ <span id="totalPending">0</span></p>
+        </div>
+    </div>
+
+    <div class="glass add-box">
+        <h2>Add Student</h2>
+        <input type="text" id="name" placeholder="Student Name">
+        <input type="number" id="fees" placeholder="Monthly Fees">
+        <input type="number" id="paid" placeholder="Amount Paid">
+        <input type="date" id="paymentDate">
+        <button onclick="addStudent()">Add Student</button>
+    </div>
+
+    <div class="glass" style="margin-top:20px;">
+        <h3>Month-wise Income Summary</h3>
+        <div id="monthSummary"></div>
+    </div>
+
+    <div class="glass" style="margin-top:20px;">
+        <h3>Income Analytics</h3>
+        <canvas id="incomeChart"></canvas>
+    </div>
+
+    <input type="text" id="searchInput" placeholder="Search student..."
+    onkeyup="searchStudent()" class="search-box">
+
+    <div id="students"></div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

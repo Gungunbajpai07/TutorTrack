@@ -1,0 +1,19 @@
+{
+  "name": "tutortrack",
+  "version": "1.0.0",
+  "description": "TutorTrack - Student Management System",
+  "main": "backend/index.js",
+  "scripts": {
+    "start": "node backend/index.js",
+    "dev": "node backend/index.js",
+    "install-all": "cd backend && npm install && cd ..",
+    "setup": "npm run install-all"
+  },
+  "keywords": ["tutortrack", "student-management", "mongodb"],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  }
+}
