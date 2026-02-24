@@ -125,7 +125,7 @@ async function loadStudentsFromAPI() {
         loadStudents();
     } catch (error) {
         console.error("Error loading students:", error);
-        alert("Failed to load students. Make sure the backend server is running.");
+        // Silently fail on first load (useful for cold starts on free hosting)
     }
 }
 
@@ -164,7 +164,7 @@ async function addStudent() {
         await loadStudentsFromAPI();
     } catch (error) {
         console.error("Error adding student:", error);
-        alert("Failed to add student. Make sure the backend server is running.");
+        // Optionally show a user-friendly message here
     }
 }
 
@@ -193,11 +193,8 @@ function loadStudents(list = students) {
             <p>Fees: ₹ ${s.fees}</p>
             <p>Paid: ₹ ${s.paid}</p>
             <p>Pending: ₹ ${s.fees - s.paid}</p>
-            <p>Attendance: ${s.attendance || 0}</p>
-            <button onclick="markAttendance('${studentId}')">Present</button>
             <button onclick="editStudent('${studentId}')">Edit</button>
             <button onclick="deleteStudent('${studentId}')">Delete</button>
-            <button onclick="sendReminder('${s.name}')">Reminder</button>
         `;
 
         container.appendChild(div);
@@ -225,7 +222,7 @@ async function deleteStudent(id) {
         await loadStudentsFromAPI();
     } catch (error) {
         console.error("Error deleting student:", error);
-        alert("Failed to delete student. Make sure the backend server is running.");
+        // Optionally show a user-friendly message here
     }
 }
 
@@ -252,29 +249,9 @@ async function editStudent(id) {
             await loadStudentsFromAPI();
         } catch (error) {
             console.error("Error updating student:", error);
-            alert("Failed to update student. Make sure the backend server is running.");
+            // Optionally show a user-friendly message here
         }
     }
-}
-
-async function markAttendance(id) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/students/${id}/attendance`, {
-            method: "PUT",
-            headers: getAuthHeaders()
-        });
-
-        if (!response.ok) throw new Error("Failed to update attendance");
-
-        await loadStudentsFromAPI();
-    } catch (error) {
-        console.error("Error updating attendance:", error);
-        alert("Failed to update attendance. Make sure the backend server is running.");
-    }
-}
-
-function sendReminder(name) {
-    alert("Reminder sent to " + name);
 }
 
 function searchStudent() {
